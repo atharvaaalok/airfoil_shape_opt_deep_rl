@@ -1,0 +1,8 @@
+version = 1
+revision = 3
+requires-python = ">=3.10.0"
+
+[[package]]
+name = "airfoil-shape-opt-deep-rl"
+version = "0.1.0"
+source = { virtual = "." }
