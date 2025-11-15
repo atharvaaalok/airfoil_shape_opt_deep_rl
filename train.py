@@ -159,7 +159,7 @@ if __name__ == '__main__':
 
     X_original = nig_net(T)
     fig_filename = log_path / 'final_shape.svg'
-    plot_curves(X_original, X_test, filename = fig_filename)
+    plot_curves(X_original, X_test, filename = fig_filename, show_plot = False)
     L_by_D = f'{L_by_D:7.3f}' if L_by_D is not None else str(L_by_D)
     print(f'\n\nFinal L_by_D of trained policy: {L_by_D}')
     print(f'Last reward: {reward:7.3f}')
