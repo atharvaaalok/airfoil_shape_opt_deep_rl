@@ -1,3 +1,5 @@
+import copy
+
 from geodiff.utils import sample_T
 import gymnasium as gym
 from gymnasium import spaces
@@ -6,7 +8,7 @@ import torch
 from torch import nn
 from torch.nn.utils import parameters_to_vector, vector_to_parameters
 
-from cfd_utils.aerodynamics import compute_L_by_D
+from ..cfd_utils.aerodynamics import compute_L_by_D
 
 
 class NIGnetShapeEnv(gym.Env):
@@ -20,6 +22,8 @@ class NIGnetShapeEnv(gym.Env):
         action_sigma: float,
         max_episode_steps: int,
         non_convergence_reward: float,
+        Mach_num: float,
+        Re: float,
     ) -> None:
         """Initialize the NIGnet shape environment by specifying the observation and action spaces
         and the initial internal state.
@@ -32,10 +36,12 @@ class NIGnetShapeEnv(gym.Env):
         """
         super().__init__()
 
-        self.nig_net = nig_net
+        self.nig_net = copy.deepcopy(nig_net)
         self.action_sigma = action_sigma
         self.max_episode_steps = max_episode_steps
         self.non_convergence_reward = non_convergence_reward
+        self.Mach_num = Mach_num
+        self.Re = Re
 
 
         # Flatten parameter vector once to fix observation and action dimensions
@@ -92,10 +98,10 @@ class NIGnetShapeEnv(gym.Env):
         self.state = new_params.cpu().numpy().astype(np.float32)
 
         # Calculate reward
-        num_pts = 250
+        num_pts = 251
         T = sample_T(geometry_dim = 2, num_pts = num_pts)
         X = self.nig_net(T).detach().cpu().numpy()
-        L_by_D = compute_L_by_D(X)
+        L_by_D = compute_L_by_D(X = X, M = self.Mach_num, Re = self.Re)
         if L_by_D is None:
             reward = self.non_convergence_reward
         else:
