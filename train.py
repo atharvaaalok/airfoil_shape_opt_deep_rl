@@ -34,10 +34,10 @@ base_log_dir = Path('logs')
 airf_to_airf = False
 config = {
     'action_sigma': 0.001,
-    'max_episode_steps': 16,
+    'max_episode_steps': 8,
     'non_convergence_reward': -50.0,
     'num_env': 16,
-    'total_training_timesteps': 2**10,
+    'total_training_timesteps': 1_000,
     'n_steps_per_env': 8,
     'batch_size': 64,
     'Mach_num': 0.1,

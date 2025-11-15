@@ -4,7 +4,7 @@ set -euo pipefail
 
 LOG_NAME="log1"
 
-for SEED in {0..10}; do
+for SEED in {0..9}; do
     echo "Running with SEED=${SEED}"
 
     RUN_DIR="logs/${LOG_NAME}/seed_${SEED}"
