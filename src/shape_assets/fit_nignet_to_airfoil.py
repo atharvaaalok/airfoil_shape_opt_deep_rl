@@ -48,7 +48,6 @@ for name, param in nig_net.named_parameters():
 # Visualize the fit
 Xc = nig_net(T)
 plot_curves(Xc, Xt)
-exit()
 
 # Save the model
 model_save_path = Path(__file__).resolve().parent / 'models/nignet_normalized_fit_to_naca0010.pth'
