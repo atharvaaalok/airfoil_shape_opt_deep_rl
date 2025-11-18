@@ -24,6 +24,7 @@ class NIGnetShapeEnv(gym.Env):
         non_convergence_reward: float,
         Mach_num: float,
         Re: float,
+        xfoil_max_iter: float,
     ) -> None:
         """Initialize the NIGnet shape environment by specifying the observation and action spaces
         and the initial internal state.
@@ -42,6 +43,7 @@ class NIGnetShapeEnv(gym.Env):
         self.non_convergence_reward = non_convergence_reward
         self.Mach_num = Mach_num
         self.Re = Re
+        self.xfoil_max_iter = xfoil_max_iter
 
 
         # Flatten parameter vector once to fix observation and action dimensions
@@ -101,7 +103,8 @@ class NIGnetShapeEnv(gym.Env):
         num_pts = 251
         T = sample_T(geometry_dim = 2, num_pts = num_pts)
         X = self.nig_net(T).detach().cpu().numpy()
-        L_by_D = compute_L_by_D(X = X, M = self.Mach_num, Re = self.Re)
+        L_by_D = compute_L_by_D(X = X, M = self.Mach_num, Re = self.Re,
+                                max_iter = self.xfoil_max_iter)
         if L_by_D is None:
             reward = self.non_convergence_reward
         else:
