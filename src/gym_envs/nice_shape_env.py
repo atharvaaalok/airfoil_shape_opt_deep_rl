@@ -25,6 +25,7 @@ class NiceShapeEnv(gym.Env):
         Mach_num: float,
         Re: float,
         xfoil_max_iter: float,
+        reward_delta: bool = False,
     ) -> None:
         """Initialize the NICE shape environment by specifying the observation and action spaces
         and the initial internal state.
@@ -44,6 +45,10 @@ class NiceShapeEnv(gym.Env):
         self.Mach_num = Mach_num
         self.Re = Re
         self.xfoil_max_iter = xfoil_max_iter
+        self.reward_delta = reward_delta
+
+        # Track previous L/D for delta rewards
+        self.prev_L_by_D = None
 
 
         # Flatten parameter vector once to fix observation and action dimensions
@@ -84,6 +89,17 @@ class NiceShapeEnv(gym.Env):
         self.state = self._param_template.cpu().numpy().copy().astype(np.float32)
         self._step_count = 0
 
+        # (Re)initialize previous L/D for delta rewards
+        if self.reward_delta:
+            num_pts = 251
+            T = sample_T(geometry_dim = 2, num_pts = num_pts)
+            X = self.nig_net(T).detach().cpu().numpy()
+            L_by_D = compute_L_by_D(X = X, M = self.Mach_num, Re = self.Re,
+                                    max_iter = self.xfoil_max_iter)
+            self.prev_L_by_D = L_by_D
+        else:
+            self.prev_L_by_D = None
+
         observation = self._get_obs()
         info = self._get_info(reward = None)
         return observation, info
@@ -106,9 +122,13 @@ class NiceShapeEnv(gym.Env):
         L_by_D = compute_L_by_D(X = X, M = self.Mach_num, Re = self.Re,
                                 max_iter = self.xfoil_max_iter)
         if L_by_D is None:
+            # Xfoil failure -> fixed penalty, regardless of reward_delta
             reward = self.non_convergence_reward
         else:
-            reward = L_by_D
+            if self.reward_delta:
+                reward = L_by_D - self.prev_L_by_D
+            else:
+                reward = L_by_D
         
         terminated = False
         truncated = self._step_count >= self.max_episode_steps
