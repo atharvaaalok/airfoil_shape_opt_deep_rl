@@ -93,7 +93,7 @@ class NiceShapeEnv(gym.Env):
         if self.reward_delta:
             num_pts = 251
             T = sample_T(geometry_dim = 2, num_pts = num_pts)
-            X = self.nig_net(T).detach().cpu().numpy()
+            X = self.nice(T).detach().cpu().numpy()
             L_by_D = compute_L_by_D(X = X, M = self.Mach_num, Re = self.Re,
                                     max_iter = self.xfoil_max_iter)
             self.prev_L_by_D = L_by_D
